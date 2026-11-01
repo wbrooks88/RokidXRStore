@@ -1,0 +1,35 @@
+[
+  {
+    "name": "Hello XR (OpenGL ES)",
+    "publisher": "Khronos Group",
+    "about": "The official OpenXR test app: cubes floating around you.",
+    "repo": "KhronosGroup/OpenXR-SDK-Source",
+    "asset": "^hello_xr-OpenGLES-release-.*\\.apk$",
+    "status": "Works"
+  },
+  {
+    "name": "Hello XR (Vulkan)",
+    "publisher": "Khronos Group",
+    "about": "The same test app, drawn with Vulkan.",
+    "repo": "KhronosGroup/OpenXR-SDK-Source",
+    "asset": "^hello_xr-Vulkan-release-.*\\.apk$",
+    "status": "Works"
+  },
+  {
+    "name": "Godot XR Tools Demo",
+    "publisher": "Godot XR (GodotVR)",
+    "about": "Godot's XR toolkit demo: movement, pickups and UI in a 3D scene.",
+    "repo": "GodotVR/godot-xr-tools",
+    "asset": "^Android-Khronos\\.zip$",
+    "zipEntry": "\\.apk$",
+    "status": "Renders; waits for a controller trigger to start"
+  },
+  {
+    "name": "Wolvic",
+    "publisher": "Igalia",
+    "about": "An open-source XR web browser (Firefox engine), including WebXR sites.",
+    "repo": "Igalia/wolvic",
+    "asset": "^Wolvic-lynx-arm64-gecko-generic-release\\.apk$",
+    "status": "Runs; controls not tested yet"
+  }
+]

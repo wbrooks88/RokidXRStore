@@ -65,6 +65,9 @@ Station won't let them draw on the glasses) and signed with a key generated on y
     tools/setup-mac.sh     # once: JDK 17, Android build tools, NDK (Homebrew)
     ./build.sh             # -> build/XRStore.apk (debug key; set XRSTORE_KEYSTORE for release)
 
+Releases are signed with one release key, kept outside the repository. Updates must be signed
+with that same key, or Android refuses them; see `tools/release.sh`.
+
 `tools/make-uxr.sh` adapts an APK on a computer the same way XR Store does on the Station.
 
 ## Third-party components
@@ -72,3 +75,9 @@ Station won't let them draw on the glasses) and signed with a key generated on y
 - Khronos OpenXR loader for Android (Apache-2.0), bundled for converting Quest builds.
 - apksig from the Android SDK build tools (Apache-2.0), bundled for signing on the device.
 - Downloaded at setup from their official releases: the Khronos OpenXR runtime broker, Wolvic.
+
+## License
+
+Licensed under either of [Apache License 2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT), at your
+option. Rokid, Khronos and other names belong to their owners; this project isn't affiliated with
+Rokid.

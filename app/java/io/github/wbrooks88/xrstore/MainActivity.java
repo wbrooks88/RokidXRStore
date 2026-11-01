@@ -374,8 +374,6 @@ public class MainActivity extends Activity {
 			say("Confirm the install of " + pkg + "…");
 			break;
 		case PackageInstaller.STATUS_SUCCESS:
-			if (BridgeBuilder.BRIDGE.equals(pkg))
-				BridgeBuilder.markInstalled(this);
 			say("Installed " + pkg + ".");
 			setup.refresh();
 			store.refreshInstalled();

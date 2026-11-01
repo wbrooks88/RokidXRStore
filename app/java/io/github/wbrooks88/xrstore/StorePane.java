@@ -162,7 +162,8 @@ final class StorePane {
 		for (android.content.pm.ApplicationInfo app : pm.getInstalledApplications(android.content.pm.PackageManager.GET_META_DATA)) {
 			if ((app.flags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0 || app.metaData == null
 					|| !"uxr".equalsIgnoreCase(app.metaData.getString("com.rokid.sdk", ""))
-					|| pm.getLaunchIntentForPackage(app.packageName) == null)
+					|| pm.getLaunchIntentForPackage(app.packageName) == null
+					|| app.packageName.equals(SetupPane.BROKER)) // a settings screen, not an XR app
 				continue;
 			xrApps.add(app);
 		}

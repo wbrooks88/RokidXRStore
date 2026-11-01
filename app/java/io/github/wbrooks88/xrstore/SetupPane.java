@@ -74,7 +74,9 @@ final class SetupPane {
 
 	/** Asks the broker which runtime is active. */
 	private boolean bridgeChosen() {
-		try (Cursor c = activity.getContentResolver().query(ACTIVE_RUNTIME, null, null, null, null)) {
+		// The broker requires a projection (it fails on null).
+		try (Cursor c = activity.getContentResolver().query(ACTIVE_RUNTIME, new String[] {"package_name"},
+				null, null, null)) {
 			if (c == null || !c.moveToFirst())
 				return false;
 			int col = c.getColumnIndex("package_name");

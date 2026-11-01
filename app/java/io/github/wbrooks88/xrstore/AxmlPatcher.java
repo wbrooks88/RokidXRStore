@@ -24,7 +24,7 @@ final class AxmlPatcher {
 	static final String KEY = "com.rokid.sdk", VALUE = "uxr";
 	private static final String ANDROID_NS = "http://schemas.android.com/apk/res/android";
 	private static final int ATTR_NAME = 0x01010003, ATTR_VALUE = 0x01010024, ATTR_AUTHORITIES = 0x01010018,
-			ATTR_VERSION_CODE = 0x0101021b;
+			ATTR_VERSION_CODE = 0x0101021b, ATTR_VERSION_NAME = 0x0101021c;
 	private static final int TYPE_INT_DEC = 0x10;
 	static final String BROKER_AUTHORITIES = "org.khronos.openxr.runtime_broker;org.khronos.openxr.system_runtime_broker";
 	static final String RUNTIME_SERVICE = "org.khronos.openxr.OpenXRRuntimeService";
@@ -33,6 +33,7 @@ final class AxmlPatcher {
 		boolean tag = true;
 		boolean brokerQueries;
 		int versionCode = -1;
+		String versionName;
 	}
 	private static final int NONE = -1;
 	private static final int RES_STRING_POOL = 0x0001, RES_XML = 0x0003, RES_XML_RESOURCE_MAP = 0x0180;
@@ -102,6 +103,8 @@ final class AxmlPatcher {
 			int line = b.getInt(8);
 			if (isStart && "manifest".equals(element) && o.versionCode >= 0)
 				setIntAttr(node, ATTR_VERSION_CODE, o.versionCode);
+			if (isStart && "manifest".equals(element) && o.versionName != null)
+				setStringAttr(node, ATTR_VERSION_NAME, string(o.versionName));
 			if (isStart && "application".equals(element) && !seenApplication && addQueries)
 				body.write(brokerQueries(line, ns, nameAttr, authoritiesAttr));
 			body.write(node);
@@ -152,6 +155,21 @@ final class AxmlPatcher {
 				b.putInt(a + 8, NONE);
 				node[a + 15] = (byte) TYPE_INT_DEC;
 				b.putInt(a + 16, value);
+			}
+		}
+	}
+
+	/** Sets a string attribute (by framework resource id) of a start-element node in place. */
+	private void setStringAttr(byte[] node, int resId, int stringIndex) {
+		ByteBuffer b = ByteBuffer.wrap(node).order(ByteOrder.LITTLE_ENDIAN);
+		int start = 16 + (b.getShort(24) & 0xffff), size = b.getShort(26) & 0xffff,
+				count = b.getShort(28) & 0xffff;
+		for (int i = 0; i < count; i++) {
+			int a = start + i * size, name = b.getInt(a + 4);
+			if (name >= 0 && name < resMap.length && resMap[name] == resId) {
+				b.putInt(a + 8, stringIndex);
+				node[a + 15] = (byte) TYPE_STRING;
+				b.putInt(a + 16, stringIndex);
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 package io.github.wbrooks88.xrstore;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -30,7 +29,6 @@ import java.util.zip.ZipOutputStream;
 final class BridgeBuilder {
 	static final String RUNTIME = "com.rokid.openxr.runtime";
 	static final String BRIDGE = "io.github.wbrooks88.xrstore.bridge";
-	private static final String PREFS = "bridge";
 
 	private BridgeBuilder() {}
 
@@ -64,24 +62,27 @@ final class BridgeBuilder {
 		}
 	}
 
-	/** Installed and built from the runtime that is on the Station now. */
+	/**
+	 * Installed and built from the runtime that is on the Station now. The bridge carries the
+	 * runtime it was built from in its versionName, so this survives XR Store being reinstalled.
+	 */
 	static boolean upToDate(Context c) {
-		return installed(c) && runtimeFingerprint(c).equals(prefs(c).getString("built_from", null));
+		try {
+			String built = c.getPackageManager().getPackageInfo(BRIDGE, 0).versionName;
+			return versionName(c).equals(built);
+		} catch (PackageManager.NameNotFoundException e) {
+			return false;
+		}
 	}
 
-	/** Records that the bridge now installed was built from the current runtime. */
-	static void markInstalled(Context c) {
-		prefs(c).edit().putString("built_from", prefs(c).getString("pending", "")).apply();
-	}
-
-	private static SharedPreferences prefs(Context c) {
-		return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+	/** "rokid-" plus a short hash of the runtime fingerprint. */
+	private static String versionName(Context c) {
+		return "rokid-" + Integer.toHexString(runtimeFingerprint(c).hashCode());
 	}
 
 	/** Builds and signs the bridge APK into {@code out}. */
 	static void build(Context c, File out, File work, ApkTagger.Signer signer) throws Exception {
 		ApplicationInfo rt = c.getPackageManager().getApplicationInfo(RUNTIME, 0);
-		String fingerprint = runtimeFingerprint(c);
 		File unsigned = new File(work, "bridge-unsigned.apk");
 		try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(unsigned))) {
 			// Our part, with a versionCode that always increases so a rebuild installs as an update.
@@ -92,6 +93,7 @@ final class BridgeBuilder {
 						AxmlPatcher.Options o = new AxmlPatcher.Options();
 						o.tag = false;
 						o.versionCode = (int) (System.currentTimeMillis() / 60000L);
+						o.versionName = versionName(c);
 						data = AxmlPatcher.patch(data, o);
 					}
 					// Android 11+ needs resources.arsc stored uncompressed (apksig aligns it).
@@ -113,7 +115,6 @@ final class BridgeBuilder {
 		}
 		ApkTagger.sign(unsigned, out, signer);
 		unsigned.delete();
-		prefs(c).edit().putString("pending", fingerprint).apply();
 	}
 
 	private static byte[] read(InputStream in) throws Exception {
